@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { readTalkerData } = require('./fsUtils');
+const { readTalkerData, createToken } = require('./fsUtils');
 
 // iniciando
 
@@ -28,6 +28,8 @@ app.get('/talker/:id', async (req, res) => {
   return talker ? res.status(200).json(talker) : res.status(404)
     .json({ message: 'Pessoa palestrante não encontrada' });
 });
+
+app.post('/login', async (req, res) => res.status(200).json({ token: createToken() }));
 
 app.listen(PORT, () => {
   console.log('Online');

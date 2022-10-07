@@ -1,4 +1,5 @@
 const fs = require('fs').promises;
+const { Console } = require('console');
 const path = require('path');
 
 const TALKERS_DATA_PATH = './talker.json';
@@ -25,9 +26,19 @@ async function writeTalkerData(newTaker) {
   }
 }
 
-readTalkerData();
+function createToken() {
+  const charList = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let token = '';
+  for (let i = 1; i <= 16; i += 1) {
+    token += charList[Math.floor(Math.random() * 62)];
+  }
+  return token;
+}
+ 
+createToken();
 
 module.exports = {
   readTalkerData,
   writeTalkerData,
+  createToken,
 };
