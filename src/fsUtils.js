@@ -7,7 +7,7 @@ async function readTalkerData() {
   try {
     const data = await fs.readFile(path.resolve(__dirname, TALKERS_DATA_PATH));
     const talkers = await JSON.parse(data);
-    console.log(talkers);
+    // console.log(talkers);
     return talkers;
   } catch (error) {
     console.error(`Erro na leitura do arquivo Erro: ${error}`);
