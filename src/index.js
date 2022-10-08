@@ -1,6 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { readTalkerData, createToken, validateEmail, validateDate, writeTalkerData } = require('./fsUtils');
+const { 
+  readTalkerData, createToken, validateEmail, validateDate, writeTalkerData,
+} = require('./fsUtils');
 
 // iniciando
 
