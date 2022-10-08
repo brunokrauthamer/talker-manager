@@ -1,5 +1,4 @@
 const fs = require('fs').promises;
-const { Console } = require('console');
 const path = require('path');
 
 const TALKERS_DATA_PATH = './talker.json';
@@ -34,6 +33,13 @@ function createToken() {
   }
   return token;
 }
+
+const validateEmail = (email) => {
+  const re = (/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/);
+  return String(email)
+    .toLowerCase()
+    .match(re);
+};
  
 createToken();
 
@@ -41,4 +47,5 @@ module.exports = {
   readTalkerData,
   writeTalkerData,
   createToken,
+  validateEmail,
 };
