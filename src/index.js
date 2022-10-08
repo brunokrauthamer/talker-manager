@@ -19,6 +19,36 @@ app.get('/', (_request, response) => {
   response.status(HTTP_OK_STATUS).send();
 });
 
+  // Aqui começa o req 8
+
+const verifySearchTerm = async (req, res, next) => {
+    if (req.query.q === undefined || req.query.q === '') {
+      const oldList = await readTalkerData();
+      return res.status(200).json(oldList);
+    }
+    next();
+  };
+
+  const verifyAuthorization = (req, res, next) => {
+    const { authorization } = req.headers;
+    // console.log(`o token é ${authorization}`);
+    if (!authorization) {
+      // console.log('entrou no token não encontrado');
+      return res.status(401).json({ message: 'Token não encontrado' });
+    }
+    if (!tokens.some((tok) => tok === authorization)) {
+      return res.status(401).json({ message: 'Token inválido' });
+    }
+    // console.log('Não barrou a verificação de token');
+    return next();
+  };
+  
+app.get('/talker/search', verifyAuthorization, verifySearchTerm, async (req, res) => {
+    const oldList = await readTalkerData();
+    const newList = oldList.filter((talker) => talker.name.includes(req.query.q));
+    return res.status(200).json(newList);
+  });  
+
 app.get('/talker', async (req, res) => {
   const talkers = await readTalkerData();
 
@@ -63,20 +93,6 @@ app.post('/login', verifyEmail, verifyPassword, (req, res) => {
 });
 
 // Aqui começa o Req 5
-
-const verifyAuthorization = (req, res, next) => {
-  const { authorization } = req.headers;
-  // console.log(`o token é ${authorization}`);
-  if (!authorization) {
-    // console.log('entrou no token não encontrado');
-    return res.status(401).json({ message: 'Token não encontrado' });
-  }
-  if (!tokens.some((tok) => tok === authorization)) {
-    return res.status(401).json({ message: 'Token inválido' });
-  }
-  // console.log('Não barrou a verificação de token');
-  return next();
-};
 
 const verifyName = (req, res, next) => {
   const { name } = req.body;
@@ -158,8 +174,6 @@ app.delete('/talker/:id', verifyAuthorization, async (req, res) => {
   await writeTalkerDataByList(newList);
   return res.status(204).end();
 });
-
-  // Aqui começa o req 8
 
 app.listen(PORT, () => {
   console.log('Online');
