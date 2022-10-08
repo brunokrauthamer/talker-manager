@@ -49,11 +49,15 @@ app.get('/talker/search', verifyAuthorization, verifySearchTerm, async (req, res
     return res.status(200).json(newList);
   });  
 
+//  Req 1
+
 app.get('/talker', async (req, res) => {
   const talkers = await readTalkerData();
 
   return res.status(200).json(talkers);
 });
+
+// Req 2
 
 app.get('/talker/:id', async (req, res) => {
   const talkers = await readTalkerData();
@@ -84,6 +88,8 @@ const verifyPassword = (req, res, next) => {
   }
   return next();
 };
+
+//  Req 3 e 4
 
 app.post('/login', verifyEmail, verifyPassword, (req, res) => {
   const token = createToken();
