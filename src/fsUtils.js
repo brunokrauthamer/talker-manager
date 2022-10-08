@@ -25,6 +25,15 @@ async function writeTalkerData(newTalker) {
   }
 }
 
+async function writeTalkerDataByList(newList) {
+  try {
+    const allTalkers = JSON.stringify(newList);
+    await fs.writeFile(path.resolve(__dirname, TALKERS_DATA_PATH), allTalkers);
+  } catch (error) {
+    console.error(`Erro na escrita do arquivo - pela lista ${error}`);
+  }
+}
+
 // writeTalkerData({
 //   name: 'Danielle Santos',
 //   age: 56,
@@ -64,4 +73,5 @@ module.exports = {
   createToken,
   validateEmail,
   validateDate,
+  writeTalkerDataByList,
 };

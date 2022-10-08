@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const { 
-  readTalkerData, createToken, validateEmail, validateDate, writeTalkerData,
+  readTalkerData, createToken, validateEmail, validateDate, writeTalkerData, writeTalkerDataByList,
 } = require('./fsUtils');
 
 // iniciando
@@ -58,7 +58,7 @@ const verifyPassword = (req, res, next) => {
 app.post('/login', verifyEmail, verifyPassword, (req, res) => {
   const token = createToken();
   tokens.push(token);
-  console.log(`criei um token novo e a lista de tokens é ${tokens}`);
+  // console.log(`criei um token novo e a lista de tokens é ${tokens}`);
   res.status(200).json({ token });
 });
 
@@ -66,15 +66,15 @@ app.post('/login', verifyEmail, verifyPassword, (req, res) => {
 
 const verifyAuthorization = (req, res, next) => {
   const { authorization } = req.headers;
-  console.log(`o token é ${authorization}`);
+  // console.log(`o token é ${authorization}`);
   if (!authorization) {
-    console.log('entrou no token não encontrado');
+    // console.log('entrou no token não encontrado');
     return res.status(401).json({ message: 'Token não encontrado' });
   }
   if (!tokens.some((tok) => tok === authorization)) {
     return res.status(401).json({ message: 'Token inválido' });
   }
-  console.log('Não barrou a verificação de token');
+  // console.log('Não barrou a verificação de token');
   return next();
 };
 
@@ -86,7 +86,7 @@ const verifyName = (req, res, next) => {
   if (name.length < 3) {
     return res.status(400).json({ message: 'O "name" deve ter pelo menos 3 caracteres' });
   }
-  console.log('nextei 2');
+  // console.log('nextei 2');
   return next();
 };
 
@@ -117,7 +117,7 @@ const verifyTalk = (req, res, next) => {
 
 const verifyRate = (req, res, next) => {
   const { talk } = req.body;
-  if (!talk.rate || talk.rate.length === 0) {
+  if (talk.rate === undefined || talk.rate.length === 0) {
     return res.status(400).json({ message: 'O campo "rate" é obrigatório' });
   }
   if (talk.rate < 1 || talk.rate > 5) {
@@ -133,7 +133,19 @@ verifyAuthorization, verifyName, verifyAge, verifyTalk, verifyRate, async (req, 
   return res.status(201).json({ ...req.body, id: oldList.length + 1 });
 });
 
-  // Aqui termina o req 5
+  // Aqui começa o req 6
+app.put('/talker/:id',
+verifyAuthorization, verifyName, verifyAge, verifyTalk, verifyRate, async (req, res) => {
+  const oldList = await readTalkerData();
+  console.log('old List', oldList);
+  const newList = oldList.map((talker) => (
+    talker.id === Number(req.params.id) ? { ...req.body, id: talker.id } : talker));
+  console.log('new List', newList);
+  await writeTalkerDataByList(newList);
+  return res.status(200).json({ ...req.body, id: Number(req.params.id) });
+});
+
+  // Aqui termina o req 6
 
 app.listen(PORT, () => {
   console.log('Online');
