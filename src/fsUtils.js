@@ -15,15 +15,24 @@ async function readTalkerData() {
   }
 }
 
-async function writeTalkerData(newTaker) {
+async function writeTalkerData(newTalker) {
   try {
     const oldTalkers = await readTalkerData();
-    const allTalkers = JSON.stringify([...oldTalkers, newTaker]);
-    await fs.writeFile(TALKERS_DATA_PATH, allTalkers);
+    const allTalkers = JSON.stringify([...oldTalkers, newTalker]);
+    await fs.writeFile(path.resolve(__dirname, TALKERS_DATA_PATH), allTalkers);
   } catch (error) {
     console.error(`Erro na escrita do arquivo ${error}`);
   }
 }
+
+// writeTalkerData({
+//   name: 'Danielle Santos',
+//   age: 56,
+//   talk: {
+//     watchedAt: '22/10/2019',
+//     rate: 5,
+//   },
+// });
 
 function createToken() {
   const charList = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -40,12 +49,19 @@ const validateEmail = (email) => {
     .toLowerCase()
     .match(re);
 };
- 
-createToken();
+
+const validateDate = (date) => {
+  const reg = /(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012])[- /.](19|20)\d\d/;
+    if (date.match(reg)) {
+      return true;
+    }
+    return false;
+};
 
 module.exports = {
   readTalkerData,
   writeTalkerData,
   createToken,
   validateEmail,
+  validateDate,
 };

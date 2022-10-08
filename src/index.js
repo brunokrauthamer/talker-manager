@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { readTalkerData, createToken, validateEmail } = require('./fsUtils');
+const { readTalkerData, createToken, validateEmail, validateDate, writeTalkerData } = require('./fsUtils');
 
 // iniciando
 
@@ -10,6 +10,7 @@ app.use(express.json());
 
 const HTTP_OK_STATUS = 200;
 const PORT = '3000';
+const tokens = [];
 
 // não remova esse endpoint, e para o avaliador funcionar
 app.get('/', (_request, response) => {
@@ -52,8 +53,85 @@ const verifyPassword = (req, res, next) => {
   return next();
 };
 
-app.post('/login', verifyEmail, verifyPassword, (req, res) => (
-  res.status(200).json({ token: createToken() })));
+app.post('/login', verifyEmail, verifyPassword, (req, res) => {
+  const token = createToken();
+  tokens.push(token);
+  console.log(`criei um token novo e a lista de tokens é ${tokens}`);
+  res.status(200).json({ token });
+});
+
+// Aqui começa o Req 5
+
+const verifyAuthorization = (req, res, next) => {
+  const { authorization } = req.headers;
+  console.log(`o token é ${authorization}`);
+  if (!authorization) {
+    console.log('entrou no token não encontrado');
+    return res.status(401).json({ message: 'Token não encontrado' });
+  }
+  if (!tokens.some((tok) => tok === authorization)) {
+    return res.status(401).json({ message: 'Token inválido' });
+  }
+  console.log('Não barrou a verificação de token');
+  return next();
+};
+
+const verifyName = (req, res, next) => {
+  const { name } = req.body;
+  if (!name || name.length === 0) {
+    return res.status(400).json({ message: 'O campo "name" é obrigatório' });
+  }
+  if (name.length < 3) {
+    return res.status(400).json({ message: 'O "name" deve ter pelo menos 3 caracteres' });
+  }
+  console.log('nextei 2');
+  return next();
+};
+
+const verifyAge = (req, res, next) => {
+  const { age } = req.body;
+  if (!age || String(age).length === 0) {
+    return res.status(400).json({ message: 'O campo "age" é obrigatório' });
+  }
+  if (age < 18) {
+    return res.status(400).json({ message: 'A pessoa palestrante deve ser maior de idade' });
+  }
+  return next();
+};
+
+const verifyTalk = (req, res, next) => {
+  const { talk } = req.body;
+  if (!talk) {
+    return res.status(400).json({ message: 'O campo "talk" é obrigatório' });
+  }
+  if (!talk.watchedAt || talk.watchedAt.length === 0) {
+    return res.status(400).json({ message: 'O campo "watchedAt" é obrigatório' });
+  }
+  if (!validateDate(talk.watchedAt)) {
+    return res.status(400).json({ message: 'O campo "watchedAt" deve ter o formato "dd/mm/aaaa"' });
+  }
+  return next();
+};
+
+const verifyRate = (req, res, next) => {
+  const { talk } = req.body;
+  if (!talk.rate || talk.rate.length === 0) {
+    return res.status(400).json({ message: 'O campo "rate" é obrigatório' });
+  }
+  if (talk.rate < 1 || talk.rate > 5) {
+    return res.status(400).json({ message: 'O campo "rate" deve ser um inteiro de 1 à 5' });
+  }
+  return next();
+};
+
+app.post('/talker',
+verifyAuthorization, verifyName, verifyAge, verifyTalk, verifyRate, async (req, res) => {
+  const oldList = await readTalkerData();
+  await writeTalkerData({ ...req.body, id: oldList.length + 1 });
+  return res.status(201).json({ ...req.body, id: oldList.length + 1 });
+});
+
+  // Aqui termina o req 5
 
 app.listen(PORT, () => {
   console.log('Online');
