@@ -137,15 +137,29 @@ verifyAuthorization, verifyName, verifyAge, verifyTalk, verifyRate, async (req, 
 app.put('/talker/:id',
 verifyAuthorization, verifyName, verifyAge, verifyTalk, verifyRate, async (req, res) => {
   const oldList = await readTalkerData();
-  console.log('old List', oldList);
+  // console.log('old List', oldList);
   const newList = oldList.map((talker) => (
     talker.id === Number(req.params.id) ? { ...req.body, id: talker.id } : talker));
-  console.log('new List', newList);
+  // console.log('new List', newList);
   await writeTalkerDataByList(newList);
   return res.status(200).json({ ...req.body, id: Number(req.params.id) });
 });
 
-  // Aqui termina o req 6
+  // Aqui começa o req 7
+
+app.delete('/talker/:id', verifyAuthorization, async (req, res) => {
+  const oldList = await readTalkerData();
+  console.log('lista velha', oldList);
+  const newList = oldList.filter((talker) => (
+    talker.id !== Number(req.params.id)
+  ));
+  console.log('id na requisição', req.params.id);
+  console.log('nova lista', newList);
+  await writeTalkerDataByList(newList);
+  return res.status(204).end();
+});
+
+  // Aqui começa o req 8
 
 app.listen(PORT, () => {
   console.log('Online');
